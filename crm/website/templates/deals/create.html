@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Deal - CRM System{% endblock %}
+
+{% block page_title %}Create New Deal{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Deal Title *</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contact" class="form-label">Contact *</label>
+                            <select class="form-select" id="contact" name="contact" required>
+                                <option value="">Select Contact</option>
+                                {% for contact in contacts %}
+                                    <option value="{{ contact.id }}">{{ contact.full_name }} ({{ contact.email }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="company" class="form-label">Company</label>
+                            <select class="form-select" id="company" name="company">
+                                <option value="">Select Company</option>
+                                {% for company in companies %}
+                                    <option value="{{ company.id }}">{{ company.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="amount" class="form-label">Amount *</label>
+                            <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="stage" class="form-label">Stage</label>
+                            <select class="form-select" id="stage" name="stage">
+                                {% for key, value in deal_stages %}
+                                    <option value="{{ key }}">{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="probability" class="form-label">Probability (%)</label>
+                            <input type="number" min="0" max="100" class="form-control" id="probability" name="probability" value="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="expected_close_date" class="form-label">Expected Close Date *</label>
+                            <input type="date" class="form-control" id="expected_close_date" name="expected_close_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'deal_list' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Deal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Deal Stages</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for key, value in deal_stages %}
+                    <li class="mb-2">
+                        <span class="badge bg-primary">{{ value }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

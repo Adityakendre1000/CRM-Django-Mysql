@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ contact.full_name }} - CRM System{% endblock %}
+
+{% block page_title %}{{ contact.full_name }}{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'contact_edit' contact.id %}" class="btn btn-primary">
+    <i class="fas fa-edit me-2"></i>Edit Contact
+</a>
+<a href="{% url 'deal_create' %}" class="btn btn-success">
+    <i class="fas fa-handshake me-2"></i>Create Deal
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Contact Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Contact Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong> <a href="mailto:{{ contact.email }}">{{ contact.email }}</a></p>
+                        <p><strong>Phone:</strong> 
+                            {% if contact.phone %}
+                                <a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </p>
+                        <p><strong>Company:</strong> {{ contact.company|default:"-" }}</p>
+                        <p><strong>Job Title:</strong> {{ contact.job_title|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Type:</strong> 
+                            <span class="badge bg-secondary">{{ contact.get_contact_type_display }}</span>
+                        </p>
+                        <p><strong>Status:</strong> 
+                            {% if contact.lead_status == 'new' %}
+                                <span class="badge bg-primary">{{ contact.get_lead_status_display }}</span>
+                            {% elif contact.lead_status == 'contacted' %}
+                                <span class="badge bg-info">{{ contact.get_lead_status_display }}</span>
+                            {% elif contact.lead_status == 'qualified' %}
+                                <span class="badge bg-warning">{{ contact.get_lead_status_display }}</span>
+                            {% elif contact.lead_status == 'converted' %}
+                                <span class="badge bg-success">{{ contact.get_lead_status_display }}</span>
+                            {% else %}
+                                <span class="badge bg-danger">{{ contact.get_lead_status_display }}</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>Assigned To:</strong> {{ contact.assigned_to.username|default:"-" }}</p>
+                        <p><strong>Created:</strong> {{ contact.created_at|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                
+                {% if contact.address %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <p><strong>Address:</strong><br>
+                        {{ contact.address }}<br>
+                        {% if contact.city %}{{ contact.city }}, {% endif %}
+                        {% if contact.state %}{{ contact.state }} {% endif %}
+                        {% if contact.zip_code %}{{ contact.zip_code }}{% endif %}
+                        {% if contact.country %}<br>{{ contact.country }}{% endif %}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if contact.notes %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <p><strong>Notes:</strong><br>
+                        {{ contact.notes|linebreaks }}
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Deals -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Deals ({{ deals.count }})</h5>
+                <a href="{% url 'deal_create' %}" class="btn btn-sm btn-success">Add Deal</a>
+            </div>
+            <div class="card-body">
+                {% if deals %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Amount</th>
+                                <th>Stage</th>
+                                <th>Close Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deal in deals %}
+                            <tr>
+                                <td><a href="{% url 'deal_detail' deal.id %}">{{ deal.title }}</a></td>
+                                <td>${{ deal.amount|floatformat:2 }}</td>
+                                <td>
+                                    {% if deal.stage == 'closed_won' %}
+                                        <span class="badge bg-success">{{ deal.get_stage_display }}</span>
+                                    {% elif deal.stage == 'closed_lost' %}
+                                        <span class="badge bg-danger">{{ deal.get_stage_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-primary">{{ deal.get_stage_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ deal.expected_close_date|date:"M d, Y" }}</td>
+                                <td>
+                                    <a href="{% url 'deal_detail' deal.id %}" class="btn btn-xs btn-outline-primary">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No deals yet. <a href="{% url 'deal_create' %}">Create the first deal</a></p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Tasks -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Tasks ({{ tasks.count }})</h5>
+                <a href="{% url 'task_create' %}" class="btn btn-sm btn-warning">Add Task</a>
+            </div>
+            <div class="card-body">
+                {% if tasks %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in tasks %}
+                            <tr>
+                                <td>{{ task.title }}</td>
+                                <td>{{ task.get_task_type_display }}</td>
+                                <td>
+                                    {% if task.priority == 'urgent' %}
+                                        <span class="badge bg-danger">{{ task.get_priority_display }}</span>
+                                    {% elif task.priority == 'high' %}
+                                        <span class="badge bg-warning">{{ task.get_priority_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ task.get_priority_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if task.status == 'completed' %}
+                                        <span class="badge bg-success">{{ task.get_status_display }}</span>
+                                    {% elif task.status == 'in_progress' %}
+                                        <span class="badge bg-info">{{ task.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ task.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ task.due_date|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No tasks yet. <a href="{% url 'task_create' %}">Create the first task</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Recent Activities -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Activities</h5>
+            </div>
+            <div class="card-body">
+                {% if activities %}
+                {% for activity in activities %}
+                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                    <div class="flex-shrink-0">
+                        {% if activity.activity_type == 'call' %}
+                            <i class="fas fa-phone text-primary"></i>
+                        {% elif activity.activity_type == 'email' %}
+                            <i class="fas fa-envelope text-info"></i>
+                        {% elif activity.activity_type == 'meeting' %}
+                            <i class="fas fa-calendar text-warning"></i>
+                        {% else %}
+                            <i class="fas fa-bell text-secondary"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h6 class="mb-1">{{ activity.title }}</h6>
+                        <p class="text-muted small mb-0">
+                            {{ activity.created_at|timesince }} ago
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">No activities yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

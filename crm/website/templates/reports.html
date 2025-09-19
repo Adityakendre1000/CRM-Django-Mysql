@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - CRM System{% endblock %}
+
+{% block page_title %}Reports & Analytics{% endblock %}
+
+{% block content %}
+<!-- Key Metrics -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card metric-card">
+            <div class="card-body text-center">
+                <i class="fas fa-handshake fa-2x mb-2"></i>
+                <h3>{{ total_deals }}</h3>
+                <p class="mb-0">Total Deals</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card metric-card-green">
+            <div class="card-body text-center">
+                <i class="fas fa-trophy fa-2x mb-2"></i>
+                <h3>{{ won_deals }}</h3>
+                <p class="mb-0">Won Deals</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card metric-card-red">
+            <div class="card-body text-center">
+                <i class="fas fa-times fa-2x mb-2"></i>
+                <h3>{{ lost_deals }}</h3>
+                <p class="mb-0">Lost Deals</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card metric-card-orange">
+            <div class="card-body text-center">
+                <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                <h3>${{ total_revenue|floatformat:2 }}</h3>
+                <p class="mb-0">Total Revenue</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts and Analytics -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Lead Conversion
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Conversion Rate</span>
+                    <span class="badge bg-primary fs-6">{{ conversion_rate|floatformat:1 }}%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ conversion_rate }}%" aria-valuenow="{{ conversion_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <small class="text-muted mt-2 d-block">Based on lead to customer conversion</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-tasks me-2"></i>
+                    Tasks by Status
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for status_data in tasks_by_status %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-capitalize">{{ status_data.status|default:"Unknown" }}</span>
+                    <span class="badge 
+                        {% if status_data.status == 'completed' %}bg-success
+                        {% elif status_data.status == 'in_progress' %}bg-info
+                        {% elif status_data.status == 'pending' %}bg-warning
+                        {% else %}bg-secondary{% endif %}">
+                        {{ status_data.count }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-muted">No tasks found</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Win/Loss Analysis -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Deal Win/Loss Analysis
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if total_deals > 0 %}
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h3 class="text-success">{{ won_deals }}</h3>
+                        <p class="text-muted">Won Deals</p>
+                        <small>{{ won_deals|div:total_deals|mul:100|floatformat:1 }}% of total</small>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="text-danger">{{ lost_deals }}</h3>
+                        <p class="text-muted">Lost Deals</p>
+                        <small>{{ lost_deals|div:total_deals|mul:100|floatformat:1 }}% of total</small>
+                    </div>
+                    <div class="col-md-4">
+                        {% with open_deals=total_deals|sub:won_deals|sub:lost_deals %}
+                        <h3 class="text-primary">{{ open_deals }}</h3>
+                        <p class="text-muted">Open Deals</p>
+                        <small>{{ open_deals|div:total_deals|mul:100|floatformat:1 }}% of total</small>
+                        {% endwith %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-chart-pie fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No deals data available</h5>
+                    <p class="text-muted">Create some deals to see analytics</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
